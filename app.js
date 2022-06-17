@@ -12,7 +12,58 @@ const app = new App({
 });
 
 app.message('hello', async({message,say}) => {
-  await say(`Hey there <@${message.user}>!`);
+  await say({
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "Hello, Coffee Lovers! \n\n *Please select a drink:*"
+        }
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "actions",
+        "elements": [
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "Americano",
+              "emoji": true
+            },
+            "value": "americano"
+          },
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "Latte",
+              "emoji": true
+            },
+            "value": "latte"
+          },
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "C.Mac",
+              "emoji": true
+            },
+            "value": "C.mac"
+          }
+        ]
+      }
+    ]
+  });
+});
+
+app.action('button_click', async ({ body, ack, say }) => {
+  // Acknowledge the action
+  await ack();
+  await say(`We received <@${body.user.id}> request. Please Wait for moment!`);
 });
 
 (async () => {
