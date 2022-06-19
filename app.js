@@ -1,5 +1,7 @@
 const { App } = require('@slack/bolt');
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
+const { google } = require('googleapis');
+
 // Config File
 dotenv.config({ path: './config/config.env' });
 // Initialize your app
@@ -11,59 +13,59 @@ const app = new App({
   port: process.env.PORT || 3000
 });
 
-app.message('hello', async({message,say}) => {
-  await say({
-    "text": 'Hi',
-    "blocks": [
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
-          "text": "Hello, Coffee Lovers! \n\n *Please select a drink:*"
-        }
-      },
-      {
-        "type": "divider"
-      },
-      {
-        "type": "actions",
-        "elements": [
-          {
-            "type": "button",
-            "text": {
-              "type": "plain_text",
-              "text": "Americano",
-              "emoji": true
-            },
-            "value": "americano",
-            "action_id": "button_click"
-          },
-          {
-            "type": "button",
-            "text": {
-              "type": "plain_text",
-              "text": "Latte",
-              "emoji": true
-            },
-            "value": "latte",
-            "action_id": "button_click2"
-          },
-          {
-            "type": "button",
-            "text": {
-              "type": "plain_text",
-              "text": "C.Mac",
-              "emoji": true
-            },
-            "value": "C.mac",
-            "action_id": "button_click3"
-          }
-        ],
-        // "action_id": "button_click"
-      }
-    ]
-  });
-});
+// app.message('hello', async({message,say}) => {
+//   await say({
+//     "text": 'Hi',
+//     "blocks": [
+//       {
+//         "type": "section",
+//         "text": {
+//           "type": "mrkdwn",
+//           "text": "Hello, Coffee Lovers! \n\n *Please select a drink:*"
+//         }
+//       },
+//       {
+//         "type": "divider"
+//       },
+//       {
+//         "type": "actions",
+//         "elements": [
+//           {
+//             "type": "button",
+//             "text": {
+//               "type": "plain_text",
+//               "text": "Americano",
+//               "emoji": true
+//             },
+//             "value": "americano",
+//             "action_id": "button_click"
+//           },
+//           {
+//             "type": "button",
+//             "text": {
+//               "type": "plain_text",
+//               "text": "Latte",
+//               "emoji": true
+//             },
+//             "value": "latte",
+//             "action_id": "button_click2"
+//           },
+//           {
+//             "type": "button",
+//             "text": {
+//               "type": "plain_text",
+//               "text": "C.Mac",
+//               "emoji": true
+//             },
+//             "value": "C.mac",
+//             "action_id": "button_click3"
+//           }
+//         ],
+//         // "action_id": "button_click"
+//       }
+//     ]
+//   });
+// });
 
 app.action('updateStock', async ({ ack, body, client, logger }) => {
   // Acknowledge the action
@@ -193,6 +195,39 @@ app.view('view_1', async ({ ack , body}) => {
       ]
     },
   });
+  
+  const auth = new google.auth.GoogleAuth({
+    keyFile: './config/credentials.json',
+    scopes: 'https://www.googleapis.com/auth/spreadsheets'
+  })
+  try {
+  const client = await auth.getClient();
+  const googleSheets = google.sheets({ version:'v4',auth: client});
+  // Get metadata from Google Sheet
+  const spreadsheetId = '1iU10tVrpc1Xh2dezq5xCrwBF6hk5_LpkDPO8YUe9pME'
+  // Read rows from spreadsheet
+  const getRows = await googleSheets.spreadsheets.values.get({
+    auth,
+    spreadsheetId,
+    range: 'Stock!A:A'
+  })
+  console.log(getRows.data)
+  // Write a row from spreadsheet
+  const result = await googleSheets.spreadsheets.values.append({
+    auth,
+    spreadsheetId,
+    range: 'Stock!A:B',
+    valueInputOption: 'USER_ENTERED',
+    resource: {
+      values: [
+        [userInput,1]
+      ]
+    }
+  });
+  console.log(result.status);
+} catch (e) {
+  console.error(e.message);
+}
 });
 // Listen to the app_home_opened Events API event to hear when a user opens your app from the sidebar
 app.event("app_home_opened", async ({ payload,client }) => {
