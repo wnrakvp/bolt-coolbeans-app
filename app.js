@@ -4,6 +4,16 @@ const { google } = require('googleapis');
 
 // Config File
 dotenv.config({ path: './config/config.env' });
+// Google Credentials
+const authGoogle = new google.auth.GoogleAuth({
+  keyFile: './config/credentials.json',
+  scopes: 'https://www.googleapis.com/auth/spreadsheets'
+})
+
+const clientGoogle = async() => await auth.getClient();
+const googleSheets = google.sheets({ version:'v4',auth: clientGoogle});
+const spreadsheetId = '1iU10tVrpc1Xh2dezq5xCrwBF6hk5_LpkDPO8YUe9pME'
+
 // Initialize your app
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -71,6 +81,25 @@ app.action('updateStock', async ({ ack, body, client, logger }) => {
   // Acknowledge the action
   await ack();
   try {
+    // Read rows from spreadsheet
+  const getRows = await googleSheets.spreadsheets.values.get({
+    auth: authGoogle,
+    spreadsheetId,
+    range: 'Stock!A:A'
+  })
+  console.log(getRows.data.values)
+  const options = [];
+  getRows.data.values.forEach(item => {
+    var obj = {
+      "text": {
+        "type": "plain_text",
+        "text": `${item[0]}`,
+        "emoji": true
+      },
+      "value": `${item[0]}`
+    };
+    options.push(obj)
+  })
     // Call views.open with the built-in client
     const result = await client.views.open({
       // Pass a valid trigger_id within 3 seconds of receiving it
@@ -82,23 +111,31 @@ app.action('updateStock', async ({ ack, body, client, logger }) => {
         callback_id: 'view_1',
         title: {
           type: 'plain_text',
-          text: 'Modal title'
+          text: 'Update Stock'
         },
         blocks: [
           {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: 'Welcome to a modal with _blocks_'
+            "type": "divider"
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "Pick an item from the dropdown list"
             },
-            accessory: {
-              type: 'button',
-              text: {
-                type: 'plain_text',
-                text: 'Click me!'
+            "accessory": {
+              "type": "static_select",
+              "placeholder": {
+                "type": "plain_text",
+                "text": "Select an item",
+                "emoji": true
               },
-              action_id: 'button_abc'
+              "options": options,
+              // "action_id": "static_select-action"
             }
+          },
+          {
+            "type": "divider"
           },
           {
             type: 'input',
@@ -125,50 +162,6 @@ app.action('updateStock', async ({ ack, body, client, logger }) => {
   catch (error) {
     logger.error(error);
   }
-
-  // Listen for a button invocation with action_id `button_abc` (assume it's inside of a modal)
-app.action('button_abc', async ({ ack, body, client, logger }) => {
-  // Acknowledge the button request
-  await ack();
-
-  try {
-    // Call views.update with the built-in client
-    const result = await client.views.update({
-      // Pass the view_id
-      view_id: body.view.id,
-      // Pass the current hash to avoid race conditions
-      hash: body.view.hash,
-      // View payload with updated blocks
-      view: {
-        type: 'modal',
-        // View identifier
-        callback_id: 'view_1',
-        title: {
-          type: 'plain_text',
-          text: 'Updated modal'
-        },
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'plain_text',
-              text: 'You updated the modal!'
-            }
-          },
-          {
-            type: 'image',
-            image_url: 'https://media.giphy.com/media/SVZGEcYt7brkFUyU90/giphy.gif',
-            alt_text: 'Yay! The modal was updated'
-          }
-        ]
-      }
-    });
-    logger.info(result);
-  }
-  catch (error) {
-    logger.error(error);
-  }
-});
 });
 
 // Update the view on submission 
@@ -196,25 +189,10 @@ app.view('view_1', async ({ ack , body}) => {
     },
   });
   
-  const auth = new google.auth.GoogleAuth({
-    keyFile: './config/credentials.json',
-    scopes: 'https://www.googleapis.com/auth/spreadsheets'
-  })
   try {
-  const client = await auth.getClient();
-  const googleSheets = google.sheets({ version:'v4',auth: client});
-  // Get metadata from Google Sheet
-  const spreadsheetId = '1iU10tVrpc1Xh2dezq5xCrwBF6hk5_LpkDPO8YUe9pME'
-  // Read rows from spreadsheet
-  const getRows = await googleSheets.spreadsheets.values.get({
-    auth,
-    spreadsheetId,
-    range: 'Stock!A:A'
-  })
-  console.log(getRows.data)
   // Write a row from spreadsheet
   const result = await googleSheets.spreadsheets.values.append({
-    auth,
+    auth: authGoogle,
     spreadsheetId,
     range: 'Stock!A:B',
     valueInputOption: 'USER_ENTERED',
