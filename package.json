@@ -10,6 +10,10 @@
   "license": "ISC",
   "dependencies": {
     "@slack/bolt": "^3.11.3",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "googleapis": "^103.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
   }
 }
