@@ -13,82 +13,14 @@ const authGoogle = new google.auth.GoogleAuth({
 const clientGoogle = async() => await auth.getClient();
 const googleSheets = google.sheets({ version:'v4',auth: clientGoogle});
 const spreadsheetId = '1iU10tVrpc1Xh2dezq5xCrwBF6hk5_LpkDPO8YUe9pME'
-
-// Initialize your app
-const app = new App({
-  token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-  socketMode: true,
-  appToken: process.env.SLACK_APP_TOKEN,
-  port: process.env.PORT || 3000
-});
-
-// app.message('hello', async({message,say}) => {
-//   await say({
-//     "text": 'Hi',
-//     "blocks": [
-//       {
-//         "type": "section",
-//         "text": {
-//           "type": "mrkdwn",
-//           "text": "Hello, Coffee Lovers! \n\n *Please select a drink:*"
-//         }
-//       },
-//       {
-//         "type": "divider"
-//       },
-//       {
-//         "type": "actions",
-//         "elements": [
-//           {
-//             "type": "button",
-//             "text": {
-//               "type": "plain_text",
-//               "text": "Americano",
-//               "emoji": true
-//             },
-//             "value": "americano",
-//             "action_id": "button_click"
-//           },
-//           {
-//             "type": "button",
-//             "text": {
-//               "type": "plain_text",
-//               "text": "Latte",
-//               "emoji": true
-//             },
-//             "value": "latte",
-//             "action_id": "button_click2"
-//           },
-//           {
-//             "type": "button",
-//             "text": {
-//               "type": "plain_text",
-//               "text": "C.Mac",
-//               "emoji": true
-//             },
-//             "value": "C.mac",
-//             "action_id": "button_click3"
-//           }
-//         ],
-//         // "action_id": "button_click"
-//       }
-//     ]
-//   });
-// });
-
-app.action('updateStock', async ({ ack, body, client, logger }) => {
-  // Acknowledge the action
-  await ack();
-  try {
-    // Read rows from spreadsheet
-  const getRows = await googleSheets.spreadsheets.values.get({
+const options = [];
+// Read rows from spreadsheet
+const getRows = async() => {
+  await googleSheets.spreadsheets.values.get({
     auth: authGoogle,
     spreadsheetId,
     range: 'Stock!A:A'
   })
-  console.log(getRows.data.values)
-  const options = [];
   getRows.data.values.forEach(item => {
     var obj = {
       "text": {
@@ -100,6 +32,59 @@ app.action('updateStock', async ({ ack, body, client, logger }) => {
     };
     options.push(obj)
   })
+  console.log(options)
+}
+
+// Initialize your app
+const app = new App({
+  token: process.env.SLACK_BOT_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  socketMode: true,
+  appToken: process.env.SLACK_APP_TOKEN,
+  port: process.env.PORT || 3000
+});
+// Listen to the app_home_opened Events API event to hear when a user opens your app from the sidebar
+app.event("app_home_opened", async ({ payload,client}) => {
+  const userId = payload.user;
+  try {
+    // Call the views.publish method using the WebClient passed to listeners
+    const result = await client.views.publish({
+      user_id: userId,
+      view: {
+        // Home tabs must be enabled in your app configuration page under "App Home"
+        "type": "home",
+        "blocks": [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "Click button to update Stock."
+            },
+            "accessory": {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "Click Me",
+                "emoji": true
+              },
+              "value": "updateStock",
+              "action_id": "updateStock"
+            }
+          }
+        ]
+      }
+    });
+    console.log(result);
+  }
+  catch (error) {
+    console.error(error);
+  }
+});
+
+app.action('updateStock', async ({ ack, body, client, logger, options }) => {
+  // Acknowledge the action
+  await ack();
+  try {
     // Call views.open with the built-in client
     const result = await client.views.open({
       // Pass a valid trigger_id within 3 seconds of receiving it
@@ -206,44 +191,6 @@ app.view('view_1', async ({ ack , body}) => {
 } catch (e) {
   console.error(e.message);
 }
-});
-// Listen to the app_home_opened Events API event to hear when a user opens your app from the sidebar
-app.event("app_home_opened", async ({ payload,client }) => {
-  const userId = payload.user;
-  
-  try {
-    // Call the views.publish method using the WebClient passed to listeners
-    const result = await client.views.publish({
-      user_id: userId,
-      view: {
-        // Home tabs must be enabled in your app configuration page under "App Home"
-        "type": "home",
-        "blocks": [
-          {
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": "Click button to update Stock."
-            },
-            "accessory": {
-              "type": "button",
-              "text": {
-                "type": "plain_text",
-                "text": "Click Me",
-                "emoji": true
-              },
-              "value": "updateStock",
-              "action_id": "updateStock"
-            }
-          }
-        ]
-      }
-    });
-    console.log(result);
-  }
-  catch (error) {
-    console.error(error);
-  }
 });
 
 app.error(async (error) => {
