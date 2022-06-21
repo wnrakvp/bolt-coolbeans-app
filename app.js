@@ -151,14 +151,21 @@ const homeView = (userId, client, currentStock, currentAmount, currentPrice, tot
   return result;
 };
 // -------------End of General Home View--------------------
-// Listen to the app_home_opened Events API event to hear when a user opens your app from the sidebar
-app.event('app_home_opened', async ({ payload, client, logger}) => {
+// -------------Authentication Middleware-------------------
+async function authenticateUser({payload, client, next}) {
   userId = payload.user;
+  const user = await client.oauth.v2.access();
+    console.log(user);
+  await next();
+  }
+// ---------------------------------------------------------
+// Listen to the app_home_opened Events API event to hear when a user opens your app from the sidebar
+app.event('app_home_opened',authenticateUser, async ({client, logger}) => {
   // -------------Initialize Tab Home------------------
   const currentStock = '-';
   const currentAmount = '-';
   const currentPrice = '-';
-  const totalPrice = '-';
+  const totalPrice = '0';
   const lastUpdated = '-';
   // --------------------------------------------------
   try {
