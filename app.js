@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const { google } = require('googleapis');
 const authenticateUser = require('./middleware/auth')
 const { homeView } = require('./views/home')
-const { modalView } = require('./views/ticket')
+const { modalView, updateView } = require('./views/ticket')
 
 // Config File
 dotenv.config({ path: './config/config.env' });
@@ -80,8 +80,9 @@ app.command('/update', async ({ ack, body, client, logger }) => {
   await modalView(body, client, logger)
   // await say(`${command.text}`);
 });
-app.action('selectStock', async({ack}) => {
+app.action('selectStock', async({ack, body, client, logger }) => {
   await ack();
+  await updateView(body, client, logger)
 });
 
 app.view('updatestock', async ({ack}) => {
