@@ -30,26 +30,18 @@ exports.homeView = (userId, client, currentStock, currentAmount, currentPrice, t
                 {
                   text: {
                     type: 'plain_text',
-                    text: 'Coffee Beans',
+                    text: 'Main Material',
                     emoji: true,
                   },
-                  value: 'CoffeeBeans',
+                  value: 'Main Material',
                 },
                 {
                   text: {
                     type: 'plain_text',
-                    text: 'Dairy',
+                    text: 'Sub-Material',
                     emoji: true,
                   },
-                  value: 'Dairy',
-                },
-                {
-                  text: {
-                    type: 'plain_text',
-                    text: 'Sweetened',
-                    emoji: true,
-                  },
-                  value: 'Sweetened',
+                  value: 'Sub-Material',
                 },
                 {
                   text: {

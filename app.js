@@ -16,6 +16,21 @@ const clientGoogle = async () => await auth.getClient();
 const googleSheets = google.sheets({ version: 'v4', auth: clientGoogle });
 const spreadsheetId = process.env.GOOGLESHEET_ID;
 
+// Query from Google Sheet
+// Read rows from spreadsheet
+async function queryGoogleSheet(payload) {
+const getRows = await googleSheets.spreadsheets.values.get({
+  auth: authGoogle,
+  spreadsheetId,
+  range: 'Stock Calculation!B:E',
+});
+const stocks = getRows.data.values.filter((item) => {
+  if (item.includes(payload.selected_option.value)) {
+    return item;
+  }
+});
+return stocks;
+}
 // Initialize your app
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -44,27 +59,18 @@ app.action('getStocks', async ({ ack, payload, client, logger }) => {
   logger.info(
     `Looking for ${payload.selected_option.value} Type in Google Sheet`
   );
-  // Read rows from spreadsheet
-  const getRows = await googleSheets.spreadsheets.values.get({
-    auth: authGoogle,
-    spreadsheetId,
-    range: 'Stock!A2:E10',
-  });
-  const lastUpdated = getRows.data.values[0][4];
-  const stocks = getRows.data.values.filter((item) => {
-    if (item.includes(payload.selected_option.value)) {
-      return item;
-    }
-  });
   let currentStock = '';
   let currentAmount = '';
   let currentPrice = '';
   let totalPrice = 0;
+  let lastUpdated = '';
+  const stocks = await queryGoogleSheet(payload);
   stocks.forEach((stock) => {
     currentStock += `${stock[0]}\n`;
     currentAmount += `${stock[2]}\n`;
-    currentPrice += `${stock[3]*stock[2]} Baht\n`;
+    currentPrice += `0 Baht\n`;
     totalPrice += stock[3]*stock[2];
+    lastUpdated =  stock[3];
   });
   await homeView(userId, client, currentStock, currentAmount, currentPrice, totalPrice, lastUpdated);
   logger.info(
@@ -80,8 +86,20 @@ app.command('/update', async ({ ack, body, client, logger }) => {
   await modalView(body, client, logger)
   // await say(`${command.text}`);
 });
-app.action('selectStock', async({ack, body, client, logger }) => {
+app.action('selectStock', async({ack, body, payload, client, logger }) => {
   await ack();
+  console.log(payload.selected_option.value)
+  const stocks = await queryGoogleSheet(payload);
+  console.log(stocks);
+  const query = {};
+  stocks.forEach((stock) => {
+    console.log(stock);
+    query.name = stock[0];
+    query.type = stock[1];
+    query.amount = stock[2];
+    query.update = stock[3];
+  })
+  console.log(query);
   await updateView(body, client, logger)
 });
 
