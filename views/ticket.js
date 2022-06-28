@@ -1,3 +1,5 @@
+const inputView = require('./input');
+
 exports.modalView = (body, client, logger) =>{
     try {
     // Call views.open with the built-in client
@@ -50,7 +52,7 @@ exports.modalView = (body, client, logger) =>{
                                 "emoji": true
                             },
                             "value": "Packaging"
-                        }
+                        },
                     ],
                     "action_id": "selectStock"
                 }
@@ -65,7 +67,28 @@ exports.modalView = (body, client, logger) =>{
   }
 };
 
-exports.updateView = (body, client, logger) =>{
+exports.updateView = (body, client, logger, type, updated, items) =>{
+    const blocks = [
+        {
+            "type": "section",
+            "fields": [
+                {
+                    "type": "mrkdwn",
+                    "text": `*Type:*\n${type}`
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": `*Last Updated*\n${updated}`
+                }
+            ]
+        },
+        {
+            "type": "divider"
+        }
+    ]
+    Object.entries(items).forEach(([key,val]) => {
+       blocks.push(inputView(key,val));
+    });
     try {
     // Call views.open with the built-in client
     const result = client.views.push({
@@ -82,124 +105,7 @@ exports.updateView = (body, client, logger) =>{
             },
             "type": "modal",
             "callback_id": "updatestock",
-            "blocks": [
-                {
-                    "type": "section",
-                    "fields": [
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Type:*\n Main Material"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Last Updated*\n N/A"
-                        }
-                    ]
-                },
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Coffee* (Remaining : X )"
-                    },
-                    "accessory": {
-                        "type": "static_select",
-                        "placeholder": {
-                            "type": "plain_text",
-                            "text": "Select a value",
-                            "emoji": true
-                        },
-                        "options": [
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "0",
-                                    "emoji": true
-                                },
-                                "value": "0"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "1",
-                                    "emoji": true
-                                },
-                                "value": "1"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "2",
-                                    "emoji": true
-                                },
-                                "value": "2"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "3",
-                                    "emoji": true
-                                },
-                                "value": "3"
-                            }
-                        ],
-                        "action_id": "updateAmount"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Coffee* (Remaining : X )"
-                    },
-                    "accessory": {
-                        "type": "static_select",
-                        "placeholder": {
-                            "type": "plain_text",
-                            "text": "Select a value",
-                            "emoji": true
-                        },
-                        "options": [
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "0",
-                                    "emoji": true
-                                },
-                                "value": "0"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "1",
-                                    "emoji": true
-                                },
-                                "value": "1"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "2",
-                                    "emoji": true
-                                },
-                                "value": "2"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "3",
-                                    "emoji": true
-                                },
-                                "value": "3"
-                            }
-                        ],
-                        "action_id": "updateAmount"
-                    }
-                }
-            ],
+            "blocks": blocks,
             "submit": {
                 "type": "plain_text",
                 "text": "Submit"
@@ -208,7 +114,7 @@ exports.updateView = (body, client, logger) =>{
     });
     return result;
 }   catch (e) {
-    logger.error(e);
+    logger.error(e.message);
 }
 }
 module.exports = exports;

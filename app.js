@@ -91,25 +91,26 @@ app.action('selectStock', async({ack, body, payload, client, logger }) => {
   console.log(payload.selected_option.value)
   const stocks = await queryGoogleSheet(payload);
   console.log(stocks);
-  const query = {};
+  const items = {};
   stocks.forEach((stock) => {
     console.log(stock);
-    query.name = stock[0];
-    query.type = stock[1];
-    query.amount = stock[2];
-    query.update = stock[3];
+    type = stock[1];
+    updated = stock[3];
+    items[stock[0]] = stock[2];
   })
-  console.log(query);
-  await updateView(body, client, logger)
+  console.log(items);
+  await updateView(body, client, logger, type, updated, items);
 });
 
 app.view('updatestock', async ({ack}) => {
   await ack();
 });
+
 app.error(async (error) => {
   // Check the details of the error to handle cases where you should retry sending a message or stop the app
   console.error(error);
 });
+
 (async () => {
   // Start your App
   await app.start(process.env.PORT || 3000);
