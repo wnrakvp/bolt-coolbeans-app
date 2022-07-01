@@ -20,11 +20,9 @@ const spreadsheetId = process.env.GOOGLESHEET_ID;
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  // socketMode: true,
-  // appToken: process.env.SLACK_APP_TOKEN,
+  socketMode: true,
+  appToken: process.env.SLACK_APP_TOKEN,
 });
-const interactions = createMessageAdapter(process.env.SLACK_SIGNING_SECRET);
-const slackEvents = createSlackEventAdapter(process.env.SLACK_SIGNING_SECRET);
 listenerSlack(app,googleSheets,authGoogle,spreadsheetId);
 
 (async () => {
