@@ -67,7 +67,7 @@ exports.modalView = (body, client, logger) =>{
   }
 };
 
-exports.updateView = (body, client, logger, type, updated, items) =>{
+exports.updateView = (body, client, logger, updateModal) =>{
     const blocks = [
 		{
 			"type": "section",
@@ -78,7 +78,7 @@ exports.updateView = (body, client, logger, type, updated, items) =>{
 				},
 				{
 					"type": "mrkdwn",
-					"text": `${updated}`
+					"text": `${updateModal.updated}`
 				}
 			]
 		},
@@ -91,7 +91,7 @@ exports.updateView = (body, client, logger, type, updated, items) =>{
 				},
 				{
 					"type": "mrkdwn",
-					"text": `${type}`
+					"text": `${updateModal.type}`
 				}
 			]
 		},
@@ -99,7 +99,7 @@ exports.updateView = (body, client, logger, type, updated, items) =>{
 			"type": "divider"
 		}
 	];
-    Object.entries(items).forEach(([key,val]) => {
+    Object.entries(updateModal.items).forEach(([key,val]) => {
        blocks.push(inputView(key,val));
     });
     try {

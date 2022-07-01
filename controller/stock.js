@@ -1,68 +1,134 @@
 // Query from Google Sheet
 // Read rows from spreadsheet
 const fs = require('fs');
-const data = require('../db.json');
-exports.getStockfromGoogleSheet = async (googleSheets,authGoogle,spreadsheetId,payload) => {
+exports.updateViewinHomeTab = async (payload) => {
   try {
-  const datas = [];
-  const response = await googleSheets.spreadsheets.values.get({
-    auth: authGoogle,
-    spreadsheetId,
-    range: "Stock Calculation!B:E",
-  });
-  const rows = response.data.values.filter((row) => row.length === 4);
-  rows.forEach((row,i) => {
-    let index = i + 2;
-    datas.push(
-      {
-      "stock": {
-        "value": row[0],
-        "index": `B${index}`
-      },
-      "type": { 
-        "value": row[1],
-        "index": `C${index}`
-      },
-      "remaining": {
-        "value": row[2],
-        "index": `D${index}`
-      },
-      "lastupdated": {
-        "value": row[3],
-        "index": `E${index}`
-      }
-      }
-    )
+    const updateView = {};
+    updateView.currentStock = '';
+    updateView.currentAmount = '';
+    updateView.currentPrice = '';
+    updateView.totalPrice = 0;
+    updateView.lastUpdated = '';
+    const data = JSON.parse(fs.readFileSync('db.json', 'utf-8'));
+    // console.log(data);
+    const stocks = data.filter(
+      (stock) => stock.type.value === payload.selected_option.value
+    );
+    stocks.forEach((item) => {
+      updateView.currentStock += `${item.stock.value}\n`;
+      updateView.currentAmount += `${item.remaining.value}\n`;
+      updateView.currentPrice += `0 Baht\n`;
+      updateView.totalPrice += 0;
+      updateView.lastUpdated = item.lastupdated.value;
     });
-  fs.writeFile('db.json', JSON.stringify(datas), (err) => {
-    if (err) throw err;
-    console.log('db.json Sync with Google Sheet!');
-  });
-  return data;
+    return updateView;
   } catch (e) {
-  console.log(e.message);
+    console.log(e.message);
   }
-}
+};
+exports.updateViewinModalTab = async (payload) => {
+  try {
+    const data = JSON.parse(fs.readFileSync('db.json', 'utf-8'));
+    const stocks = data.filter(
+      (stock) => stock.type.value === payload.selected_option.value
+    );
+    // console.log(stocks);
+    const updateModal = {}
+    const items = {};
+    stocks.forEach((item) => {
+      updateModal.type = item.type.value;
+      updateModal.updated = item.lastupdated.value;
+      items[item.stock.value] = item.remaining.value;
+    });
+    updateModal.items = items;
+    // console.log(updateModal);
+    return updateModal;
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+exports.getStockfromGoogleSheet = async (
+  googleSheets,
+  authGoogle,
+  spreadsheetId,
+  payload
+) => {
+  try {
+    const datas = [];
+    const response = await googleSheets.spreadsheets.values.get({
+      auth: authGoogle,
+      spreadsheetId,
+      range: 'Stock Calculation!B:E',
+    });
+    const rows = response.data.values.filter((row) => row.length === 4);
+    rows.forEach((row, i) => {
+      let index = i + 2;
+      datas.push({
+        stock: {
+          value: row[0],
+          index: `B${index}`,
+        },
+        type: {
+          value: row[1],
+          index: `C${index}`,
+        },
+        remaining: {
+          value: row[2],
+          index: `D${index}`,
+        },
+        lastupdated: {
+          value: row[3],
+          index: `E${index}`,
+        },
+      });
+    });
+    fs.writeFile('db.json', JSON.stringify(datas), (err) => {
+      if (err) throw err;
+      console.log('db.json Sync with Google Sheet!');
+    });
+    return console.log('Get Stocks Completed!');
+  } catch (e) {
+    console.log(e.message);
+  }
+};
 
 // Read and Update from spreadsheet
-exports.updateStockToGoogleSheet = async (googleSheets,authGoogle,spreadsheetId, updateData) => {
+exports.updateStockToGoogleSheet = async (
+  googleSheets,
+  authGoogle,
+  spreadsheetId,
+  payload
+) => {
   try {
+    const updateData = [];
+    const data = JSON.parse(fs.readFileSync('db.json', 'utf-8'));
+    const stocks = data.filter(
+      (stock) => stock.type.value === payload.blocks[1].fields[1].text
+    );
+    stocks.forEach((filterstock) => {
+      updateData.push({
+        range: `Stock Calculation!${filterstock.remaining.index}:${filterstock.lastupdated.index}`,
+      });
+    });
+    Object.entries(payload.state.values).forEach((item, index) => {
+      updateData[index].values = [
+        [
+          item[1].updateAmount.selected_option.value,
+          new Date().toISOString().slice(0, 10),
+        ],
+      ];
+    });
     const response = await googleSheets.spreadsheets.values.batchUpdate({
       auth: authGoogle,
       spreadsheetId,
       requestBody: {
-        valueInputOption: "USER_ENTERED",
+        valueInputOption: 'USER_ENTERED',
         data: updateData,
       },
     });
-    // const response = await googleSheets.spreadsheets.developerMetadata.get({
-    //   auth: authGoogle,
-    //   spreadsheetId,
-    //   metadataId: 1,
-    // });
-    console.log(response.status)
+    console.log(response.statusText);
     return response;
   } catch (e) {
     console.log(e.message);
   }
-}
+};
