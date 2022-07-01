@@ -21,7 +21,6 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   // socketMode: true,
   // appToken: process.env.SLACK_APP_TOKEN,
-  port: process.env.PORT || 3000,
 });
 
 listenerSlack(app,googleSheets,authGoogle,spreadsheetId);
