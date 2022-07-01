@@ -13,7 +13,7 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
         const initialView = {};
         initialView.currentStock = "-";
         initialView.currentAmount = "-";
-        initialView.currentPrice = "-";
+        initialView.currentStatus = "-";
         initialView.totalPrice = "0";
         initialView.lastUpdated = "-";
         try {
