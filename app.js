@@ -22,12 +22,12 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   socketMode: true,
   appToken: process.env.SLACK_APP_TOKEN,
-  // port: process.env.PORT || 3000,
+  port: process.env.PORT,
 });
 listenerSlack(app,googleSheets,authGoogle,spreadsheetId);
 
 (async () => {
   // Start your App
-  await app.start(process.env.PORT || 5000);
+  await app.start(process.env.PORT);
   console.log('Bolt app is running!');
 })();
