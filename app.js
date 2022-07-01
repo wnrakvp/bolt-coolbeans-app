@@ -29,5 +29,5 @@ listenerSlack(app,googleSheets,authGoogle,spreadsheetId);
 (async () => {
   // Start your App
   await app.start(process.env.PORT);
-  console.log('Bolt app is running!');
+  console.log(`Bolt app is running! on PORT ${process.env.PORT}`);
 })();
