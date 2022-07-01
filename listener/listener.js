@@ -3,26 +3,24 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
     getStockfromGoogleSheet,
     updateStockToGoogleSheet,
   } = require("../controller/stock");
+  const fs = require('fs');
   const authenticateUser = require("../middleware/auth");
   const { homeView } = require("../views/home");
   const { modalView, updateView } = require("../views/ticket");
   // Listen to the app_home_opened Events API event to hear when a user opens your app from the sidebar
     app.event("app_home_opened", authenticateUser, async ({ client, logger }) => {
-        const currentStock = "-";
-        const currentAmount = "-";
-        const currentPrice = "-";
-        const totalPrice = "0";
-        const lastUpdated = "-";
+        const initialView = {};
+        initialView.currentStock = "-";
+        initialView.currentAmount = "-";
+        initialView.currentPrice = "-";
+        initialView.totalPrice = "0";
+        initialView.lastUpdated = "-";
         try {
-        // await updateStockToGoogleSheet();
+        await getStockfromGoogleSheet(googleSheets, authGoogle, spreadsheetId);
         await homeView(
             userId,
             client,
-            currentStock,
-            currentAmount,
-            currentPrice,
-            totalPrice,
-            lastUpdated
+            initialView
         );
         } catch (e) {
         logger.error(e.message);
@@ -34,34 +32,28 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
         // Acknowledge the action
         await ack();
         logger.info(
-            `Looking for ${payload.selected_option.value} Type in Google Sheet`
+            `Looking for ${payload.selected_option.value} Type in db.json`
         );
-        let currentStock = "";
-        let currentAmount = "";
-        let currentPrice = "";
-        let totalPrice = 0;
-        let lastUpdated = "";
-        const stocks = await getStockfromGoogleSheet(
-            googleSheets,
-            authGoogle,
-            spreadsheetId,
-            payload
-        );
-        stocks.forEach((stock) => {
-            currentStock += `${stock[0]}\n`;
-            currentAmount += `${stock[2]}\n`;
-            currentPrice += `0 Baht\n`;
-            totalPrice += stock[3] * stock[2];
-            lastUpdated = stock[3];
+        const updateView = {};
+        updateView.currentStock = "";
+        updateView.currentAmount = "";
+        updateView.currentPrice = "";
+        updateView.totalPrice = 0;
+        updateView.lastUpdated = "";
+        const data = JSON.parse(fs.readFileSync('db.json','utf-8'));
+        // console.log(data);
+        const stocks = data.filter((stock) => stock.type.value === payload.selected_option.value);
+        stocks.forEach((item) => {
+            updateView.currentStock += `${item.stock.value}\n`;
+            updateView.currentAmount += `${item.remaining.value}\n`;
+            updateView.currentPrice += `0 Baht\n`;
+            updateView.totalPrice += 0;
+            updateView.lastUpdated = item.lastupdated.value;
         });
         await homeView(
             userId,
             client,
-            currentStock,
-            currentAmount,
-            currentPrice,
-            totalPrice,
-            lastUpdated
+            updateView
         );
         logger.info(
             `User: ${userId} has viewed your ${payload.selected_option.value} Stocks`
@@ -74,6 +66,7 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
     app.command("/update", async ({ ack, body, client, logger }) => {
         // Acknowledge command request
         await ack();
+        await getStockfromGoogleSheet(googleSheets, authGoogle, spreadsheetId);
         await modalView(body, client, logger);
         // await say(`${command.text}`);
     });
@@ -81,19 +74,14 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
     app.action("selectStock", async ({ ack, body, payload, client, logger }) => {
         await ack();
         // console.log(payload.selected_option.value);
-        const stocks =await getStockfromGoogleSheet(
-            googleSheets,
-            authGoogle,
-            spreadsheetId,
-            payload
-        );
+        const data = JSON.parse(fs.readFileSync('db.json','utf-8'));
+        const stocks = data.filter((stock) => stock.type.value === payload.selected_option.value);
         // console.log(stocks);
         const items = {};
-        stocks.forEach((stock) => {
-        console.log(stock);
-        type = stock[1];
-        updated = stock[3];
-        items[stock[0]] = stock[2];
+        stocks.forEach((item) => {
+        type = item.type.value;
+        updated = item.lastupdated.value;
+        items[item.stock.value] = item.remaining.value;
         });
         // console.log(items);
         await updateView(body, client, logger, type, updated, items);
@@ -101,9 +89,17 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
 
     app.view("updatestock", async ({ ack, payload }) => {
         await ack();
-        Object.entries(payload.state.values).forEach((item) => {
-        console.log(item[1].updateAmount.selected_option.value);
+        const updateData = [];
+        const data = JSON.parse(fs.readFileSync('db.json','utf-8'));
+        const stocks = data.filter((stock) => stock.type.value === payload.blocks[1].fields[1].text);
+        stocks.forEach((filterstock) => {
+            updateData.push({"range" : `Stock Calculation!${filterstock.remaining.index}:${filterstock.lastupdated.index}`})
         });
+        Object.entries(payload.state.values).forEach((item, index) => {
+            updateData[index].values = [[item[1].updateAmount.selected_option.value,new Date().toISOString().slice(0,10)]];
+        });
+        // console.log(updateData);
+        await updateStockToGoogleSheet(googleSheets, authGoogle, spreadsheetId, updateData);
     });
 
     app.action("updateAmount", async ({ ack }) => {

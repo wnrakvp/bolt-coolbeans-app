@@ -3,7 +3,7 @@ return {
     "type": "section",
     "text": {
         "type": "mrkdwn",
-        "text": `*${itemName}* (Remaining : ${amount})`
+        "text": `${itemName} (Remaining : ${amount})`
     },
     "accessory": {
         "type": "static_select",
@@ -17,7 +17,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "0",
-                    "emoji": true
                 },
                 "value": "0"
             },
@@ -25,7 +24,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "1",
-                    "emoji": true
                 },
                 "value": "1"
             },
@@ -33,7 +31,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "2",
-                    "emoji": true
                 },
                 "value": "2"
             },
@@ -41,7 +38,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "3",
-                    "emoji": true
                 },
                 "value": "3"
             },
@@ -49,7 +45,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "4",
-                    "emoji": true
                 },
                 "value": "4"
             },
@@ -57,7 +52,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "5",
-                    "emoji": true
                 },
                 "value": "5"
             },
@@ -65,7 +59,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "6",
-                    "emoji": true
                 },
                 "value": "6"
             },
@@ -73,7 +66,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "7",
-                    "emoji": true
                 },
                 "value": "7"
             },
@@ -81,7 +73,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "8",
-                    "emoji": true
                 },
                 "value": "8"
             },
@@ -89,7 +80,6 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "9",
-                    "emoji": true
                 },
                 "value": "9"
             },
@@ -97,9 +87,78 @@ return {
                 "text": {
                     "type": "plain_text",
                     "text": "10",
-                    "emoji": true
                 },
                 "value": "10"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "11",
+                },
+                "value": "11"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "12",
+                },
+                "value": "12"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "13",
+                },
+                "value": "13"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "14",
+                },
+                "value": "14"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "15",
+                },
+                "value": "15"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "16",
+                },
+                "value": "16"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "17",
+                },
+                "value": "17"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "18",
+                },
+                "value": "18"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "19",
+                },
+                "value": "19"
+            },
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": "20",
+                },
+                "value": "20"
             }
         ],
         "action_id": "updateAmount"

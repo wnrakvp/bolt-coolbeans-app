@@ -6,14 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app.js"
-    
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@slack/bolt": "^3.11.3",
     "dotenv": "^16.0.1",
-    "googleapis": "^103.0.0"
+    "googleapis": "^103.0.0",
+    "node-json-db": "^1.5.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.16"

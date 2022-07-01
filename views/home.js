@@ -1,4 +1,4 @@
-exports.homeView = (userId, client, currentStock, currentAmount, currentPrice, totalPrice, lastUpdated) => {
+exports.homeView = (userId, client, view) => {
     // Call the views.publish method using the WebClient passed to listeners
     const result = client.views.publish({
       user_id: userId,
@@ -63,7 +63,7 @@ exports.homeView = (userId, client, currentStock, currentAmount, currentPrice, t
             elements: [
               {
                 type: 'mrkdwn',
-                text: `*Current Items*\n${currentStock}`,
+                text: `*Current Items*\n${view.currentStock}`,
               },
               {
                 type: 'mrkdwn',
@@ -71,7 +71,7 @@ exports.homeView = (userId, client, currentStock, currentAmount, currentPrice, t
               },
               {
                 type: 'mrkdwn',
-                text: `*Amount*\n${currentAmount}`,
+                text: `*Remaining*\n${view.currentAmount}`,
               },
               {
                 type: 'mrkdwn',
@@ -79,7 +79,7 @@ exports.homeView = (userId, client, currentStock, currentAmount, currentPrice, t
               },
               {
                 type: 'mrkdwn',
-                text: `*Inventory Cost*\n${currentPrice}`,
+                text: `*Inventory Cost*\n${view.currentPrice}`,
               },
             ],
           },
@@ -92,7 +92,7 @@ exports.homeView = (userId, client, currentStock, currentAmount, currentPrice, t
               },
               {
                 type: 'plain_text',
-                text: `${totalPrice}  Baht`,
+                text: `${view.totalPrice}  Baht`,
               },
             ],
           },
@@ -105,7 +105,7 @@ exports.homeView = (userId, client, currentStock, currentAmount, currentPrice, t
               },
               {
                 type: 'plain_text',
-                text: `${lastUpdated}`,
+                text: `${view.lastUpdated}`,
               },
             ],
           },
@@ -117,5 +117,3 @@ exports.homeView = (userId, client, currentStock, currentAmount, currentPrice, t
     });
     return result;
   };
-
-  module.exports = exports;
