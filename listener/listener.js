@@ -72,9 +72,13 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
 
     app.command("/update", async ({ ack, body, client, logger }) => {
         // Acknowledge command request
+        try {
         await ack();
         await getStockfromGoogleSheet(googleSheets, authGoogle, spreadsheetId);
         await modalView(body, client, logger);
+        } catch(e) {
+            logger.error(e.message);
+        }
         // await say(`${command.text}`);
     });
 
@@ -84,14 +88,30 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
     });
 
     app.action("selectStock", async ({ ack, body, payload, client, logger }) => {
+        try {
         await ack();
         const updateModal = await updateViewinModalTab(payload);
         await updateView(body, client, logger, updateModal);
+        } catch (e) {
+            logger.error(e.message);
+        }
     });
 
-    app.view("updatestock", async ({ ack, payload }) => {
-        await ack();
-        await updateStockToGoogleSheet(googleSheets, authGoogle, spreadsheetId, payload);
+    app.view("updatestock", async ({ ack, payload, body, client, logger }) => {
+        try {
+            await ack({
+                response_action: "clear"
+            });
+            const user = body.user.id;
+            await updateStockToGoogleSheet(googleSheets, authGoogle, spreadsheetId, payload);
+            let msg = `${payload.blocks[1].fields[1].text} has been updated. Thanks`
+            await client.chat.postMessage({
+                channel: user,
+                text: msg
+            });
+        } catch (e) {
+            logger.error(e.message);
+        }
     });
 
     app.action("updateAmount", async ({ ack }) => {
