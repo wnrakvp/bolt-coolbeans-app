@@ -1,10 +1,10 @@
 const { App } = require('@slack/bolt');
 const { google } = require('googleapis');
-const dotenv = require('dotenv');
+// const dotenv = require('dotenv');
 const { listenerSlack } = require('./listener/listener');
 
 // Config File
-dotenv.config({ path: './config/config.env' });
+// dotenv.config({ path: './config/config.env' });
 
 // Google Credentials
 const authGoogle = new google.auth.GoogleAuth({
