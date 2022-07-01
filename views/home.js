@@ -95,7 +95,7 @@ exports.homeView = (userId, client, view) => {
             },
             {
               type: 'mrkdwn',
-              text: `*Inventory Cost*\n${view.currentPrice}`,
+              text: `*Status*\n${view.currentStatus}`,
             },
           ],
         },

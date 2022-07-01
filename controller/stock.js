@@ -6,7 +6,7 @@ exports.updateViewinHomeTab = async (payload) => {
     const updateView = {};
     updateView.currentStock = '';
     updateView.currentAmount = '';
-    updateView.currentPrice = '';
+    updateView.currentStatus = '';
     updateView.totalPrice = 0;
     updateView.lastUpdated = '';
     const data = JSON.parse(fs.readFileSync('db.json', 'utf-8'));
@@ -15,9 +15,15 @@ exports.updateViewinHomeTab = async (payload) => {
       (stock) => stock.type.value === payload.selected_option.value
     );
     stocks.forEach((item) => {
+      if (parseInt(item.remaining.value) > 10) {
+        updateView.currentStatus += `Okay\n`;
+      } else if (parseInt(item.remaining.value) > 5 ) { 
+      updateView.currentStatus += `Medium\n`;
+      } else {
+      updateView.currentStatus += `Need to Order !\n`;
+      }
       updateView.currentStock += `${item.stock.value}\n`;
-      updateView.currentAmount += `${item.remaining.value}\n`;
-      updateView.currentPrice += `0 Baht\n`;
+      updateView.currentAmount += `${item.remaining.value}\n`; 
       updateView.totalPrice += 0;
       updateView.lastUpdated = item.lastupdated.value;
     });
