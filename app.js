@@ -23,7 +23,8 @@ const app = new App({
   // socketMode: true,
   // appToken: process.env.SLACK_APP_TOKEN,
 });
-
+const interactions = createMessageAdapter(process.env.SLACK_SIGNING_SECRET);
+const slackEvents = createSlackEventAdapter(process.env.SLACK_SIGNING_SECRET);
 listenerSlack(app,googleSheets,authGoogle,spreadsheetId);
 
 (async () => {
