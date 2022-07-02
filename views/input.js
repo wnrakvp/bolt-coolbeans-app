@@ -12,6 +12,13 @@ return {
             "text": "Select a value",
             "emoji": true
         },
+        "initial_option": {
+            "text": {
+                "type": "plain_text",
+                "text": "0"
+            },
+            "value": "0"
+        },
         "options": [
             {
                 "text": {

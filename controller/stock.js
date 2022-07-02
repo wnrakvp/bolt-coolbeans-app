@@ -117,15 +117,9 @@ exports.updateStockToGoogleSheet = async (
       });
     });
     Object.entries(payload.state.values).forEach((item, index) => {
-      let amount = '';
-      if (item[1].updateAmount.selected_option.value === null) {
-        amount = stocks[index].remaining.value;
-      } else {
-        amount = item[1].updateAmount.selected_option.value;
-      }
       updateData[index].values = [
         [
-          amount,
+          item[1].updateAmount.selected_option.value,
           new Date().toISOString().slice(0, 10),
         ],
       ];
