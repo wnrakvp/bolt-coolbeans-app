@@ -2,6 +2,7 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
     const authenticateUser = require("../middleware/auth");
     const { homeView } = require("../views/home");
     const { modalView, updateView } = require("../views/ticket");
+    const { notifyToChannel } = require("../views/stockreport");
     const {
       getStockfromGoogleSheet,
       updateStockToGoogleSheet,
@@ -27,27 +28,6 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
         logger.error(e.message);
         }
     });
-
-    // app.action("refresh", authenticateUser, async ({ ack, client, logger }) => {
-    //     // Acknowledge command request
-    //     await ack();
-    //     const initialView = {};
-    //     initialView.currentStock = "-";
-    //     initialView.currentAmount = "-";
-    //     initialView.currentPrice = "-";
-    //     initialView.totalPrice = "0";
-    //     initialView.lastUpdated = "-";
-    //     try {
-    //     await getStockfromGoogleSheet(googleSheets, authGoogle, spreadsheetId);
-    //     await homeView(
-    //         userId,
-    //         client,
-    //         initialView
-    //     );
-    //     } catch (e) {
-    //     logger.error(e.message);
-    //     }
-    // });
 
     app.action("getStocks", async ({ ack, payload, client, logger }) => {
         try {
@@ -104,11 +84,26 @@ exports.listenerSlack = (app, googleSheets, authGoogle, spreadsheetId) => {
             });
             const user = body.user.id;
             await updateStockToGoogleSheet(googleSheets, authGoogle, spreadsheetId, payload);
+            
             let msg = `${payload.blocks[1].fields[1].text} has been updated. Thanks`
             await client.chat.postMessage({
                 channel: user,
                 text: msg
             });
+            const initialView = {};
+            initialView.currentStock = "-";
+            initialView.currentAmount = "-";
+            initialView.currentStatus = "-";
+            initialView.totalPrice = "0";
+            initialView.lastUpdated = "-";
+            await getStockfromGoogleSheet(googleSheets, authGoogle, spreadsheetId);
+            await homeView(
+            userId,
+            client,
+            initialView
+            );
+            const channelId = 'C03L149EDNJ'; // # notification channel
+            await notifyToChannel(channelId, client, payload);
         } catch (e) {
             logger.error(e.message);
         }
