@@ -4,12 +4,12 @@ const dotenv = require('dotenv');
 const { listenerSlack } = require('./listener/listener');
 
 // Config File
-// dotenv.config({ path: './config/config.env' });
+dotenv.config({ path: './config/config.env' });
 
 // Google Credentials
 const authGoogle = new google.auth.GoogleAuth({
-  // keyFile: './config/credentials.json',
-  keyFile: './google-credentials.json',
+  keyFile: './config/credentials.json',
+  // keyFile: './google-credentials.json',
   scopes: 'https://www.googleapis.com/auth/spreadsheets',
 });
 const clientGoogle = async () => await auth.getClient();

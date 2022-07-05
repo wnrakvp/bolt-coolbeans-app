@@ -1,3 +1,5 @@
-app.js
+# For Local Development
+.app.js
+# Folder
 node_modules
 config
