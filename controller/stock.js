@@ -1,6 +1,14 @@
 // Query from Google Sheet
 // Read rows from spreadsheet
 const fs = require('fs');
+exports.filterStockType = (payload) => {
+  const data = JSON.parse(fs.readFileSync('db.json', 'utf-8'));
+  const stocks = data.filter(
+      (stock) => stock.type.value === payload.blocks[1].fields[1].text
+  );
+  return stocks;
+};
+
 exports.updateViewinHomeTab = async (payload) => {
   try {
     const updateView = {};
@@ -15,10 +23,15 @@ exports.updateViewinHomeTab = async (payload) => {
       (stock) => stock.type.value === payload.selected_option.value
     );
     stocks.forEach((item) => {
-      if (parseInt(item.remaining.value) > 10) {
+      if (parseInt(item.remaining.value) > 10) { // Correct Amount This Line
         updateView.currentStatus += `Okay\n`;
+<<<<<<< HEAD
       } else if (parseInt(item.remaining.value) > 5) {
         updateView.currentStatus += `Medium\n`;
+=======
+      } else if (parseInt(item.remaining.value) > 5 ) { // Correct Amount This Line
+      updateView.currentStatus += `Medium\n`;
+>>>>>>> d63d2b492ab25d65412958f9d8d24828bf90d2e4
       } else {
         updateView.currentStatus += `Need to Order !\n`;
       }
@@ -32,6 +45,7 @@ exports.updateViewinHomeTab = async (payload) => {
     console.log(e.message);
   }
 };
+
 exports.updateViewinModalTab = async (payload) => {
   try {
     const data = JSON.parse(fs.readFileSync('db.json', 'utf-8'));
@@ -53,6 +67,7 @@ exports.updateViewinModalTab = async (payload) => {
     console.log(e.message);
   }
 };
+
 exports.getStockfromGoogleSheet = async (
   googleSheets,
   authGoogle,
