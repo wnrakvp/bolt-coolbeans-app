@@ -24,7 +24,7 @@ const app = new App({
   appToken: process.env.SLACK_APP_TOKEN,
   port: process.env.PORT || 5000,
 });
-listenerSlack(app,googleSheets,authGoogle,spreadsheetId);
+listenerSlack(app, googleSheets, authGoogle, spreadsheetId);
 
 (async () => {
   // Start your App

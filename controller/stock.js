@@ -17,13 +17,13 @@ exports.updateViewinHomeTab = async (payload) => {
     stocks.forEach((item) => {
       if (parseInt(item.remaining.value) > 10) {
         updateView.currentStatus += `Okay\n`;
-      } else if (parseInt(item.remaining.value) > 5 ) { 
-      updateView.currentStatus += `Medium\n`;
+      } else if (parseInt(item.remaining.value) > 5) {
+        updateView.currentStatus += `Medium\n`;
       } else {
-      updateView.currentStatus += `Need to Order !\n`;
+        updateView.currentStatus += `Need to Order !\n`;
       }
       updateView.currentStock += `${item.stock.value}\n`;
-      updateView.currentAmount += `${item.remaining.value}\n`; 
+      updateView.currentAmount += `${item.remaining.value}\n`;
       updateView.totalPrice += 0;
       updateView.lastUpdated = item.lastupdated.value;
     });
@@ -39,7 +39,7 @@ exports.updateViewinModalTab = async (payload) => {
       (stock) => stock.type.value === payload.selected_option.value
     );
     // console.log(stocks);
-    const updateModal = {}
+    const updateModal = {};
     const items = {};
     stocks.forEach((item) => {
       updateModal.type = item.type.value;
